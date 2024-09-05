@@ -1,14 +1,48 @@
+require('env');
+const parser = require('body-parser');
 const express = require("express");
-const app = express();
+const ejs = require("ejs");
 const ejsLayouts = require("express-ejs-layouts");
 
-//configuration
+const app = express();
+
+app.use(parser.urlencoded({ extended: false }))
+app.use(parser.json())
+
+app.set('view engine', 'ejs');
+
+app.use(ejsLayouts);
 
 const tasks = [];
 
-// Routes
+app.get('/', (req, res) => {
+  res.render('layout', {tasks: tasks});
+});
+
+app.post('/add', (req, res) => {
+  tasks.push({
+    name: req.body.task,
+    done: false
+  })
+  res.redirect('/');
+});
+
+app.post('/update/:index', (req, res) => {
+  const index = req.params.index;
+  const updatedTask = {
+    ...tasks[index],
+    done: !tasks[index].done
+  }
+  tasks.splice(index, 1, updatedTask);
+  res.redirect('/');
+});
 
 
-const server = //start the server
+app.post('/delete/:index', (req, res) => {
+  tasks.splice(req.params.index, 1);
+  res.redirect('/');
+});
+
+const server = app.listen(process.env.port || 3000);
 
 module.exports = server;
